@@ -1,0 +1,114 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+using System.IO;
+
+namespace WebApplication2
+{
+    public partial class _Default : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                LoadRecord();
+            }
+        }
+        SqlConnection con = new SqlConnection(@"Data Source=.\SQLEXPRESS;AttachDbFilename=C:\Users\This PC\Documents\ProgrammingDB.mdf;Integrated Security=True;Connect Timeout=30;User Instance=True");
+
+        protected void Button1_Click(object sender, EventArgs e)
+        {
+           
+            con.Open();
+            SqlCommand comm = new SqlCommand("Insert into StudentInfo_Tab values('"+int.Parse(TextBox1.Text)+"','"+TextBox2.Text+"','"+DropDownList1.SelectedValue+"','"+double.Parse(TextBox3.Text)+"','"+TextBox4.Text+"')",con);
+            comm.ExecuteNonQuery();
+            con.Close();
+            ScriptManager.RegisterStartupScript(this,this.GetType(),"Script","alert('successfully inserted');",true);
+            LoadRecord();
+        }
+        void LoadRecord()
+        {
+            SqlCommand comm = new SqlCommand("Select * from StudentInfo_Tab ",con);
+            SqlDataAdapter d = new SqlDataAdapter(comm);
+            DataTable dt = new DataTable();
+            d.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.DataBind();
+        }
+
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            SqlCommand comm = new SqlCommand("Update StudentInfo_Tab set StudentName = '" + TextBox2.Text + "',Address = '" + DropDownList1.SelectedValue + "', Age = '" + double.Parse(TextBox3.Text) + "',contact = '" + TextBox4.Text + "' where StudentID= '" + int.Parse(TextBox1.Text) + "'", con);
+            comm.ExecuteNonQuery();
+            con.Close();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "Script", "alert('successfully UPDATED');", true);
+            LoadRecord();
+        }
+
+        protected void Button4_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            SqlCommand comm = new SqlCommand("Delete StudentInfo_Tab where StudentID= '"+int.Parse(TextBox1.Text)+"'",con);
+
+            comm.ExecuteNonQuery();
+            con.Close();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "Script", "alert('successfully DELETED');", true);
+            LoadRecord();
+        }
+
+        protected void Button5_Click(object sender, EventArgs e)
+        {
+            SqlCommand comm = new SqlCommand("Select * from StudentInfo_Tab where StudentID= '" + int.Parse(TextBox1.Text) + "'", con);
+            SqlDataAdapter d = new SqlDataAdapter(comm);
+            DataTable dt = new DataTable();
+            d.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.DataBind();
+        }
+
+        protected void Button6_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            SqlCommand comm = new SqlCommand("Select * from StudentInfo_Tab where StudentID= '" + int.Parse(TextBox1.Text) + "'", con);
+            SqlDataReader dr = comm.ExecuteReader();
+            while (dr.Read())
+            {
+
+                TextBox2.Text = dr.GetValue(1).ToString();
+                DropDownList1.SelectedValue = dr.GetValue(2).ToString();
+                TextBox3.Text = dr.GetValue(3).ToString();
+                TextBox4.Text = dr.GetValue(4).ToString();
+
+            }
+        }
+
+        static string base64String = null;
+        public string ImageToBase64()
+        {
+            string path = "E:\\1.png";
+            using (System.Drawing.Image image = System.Drawing.Image.FromFile(path))
+            {
+                using (MemoryStream m = new MemoryStream())
+                {
+                    image.Save(m, image.RawFormat);
+                    byte[] imageBytes = m.ToArray();
+                    base64String = Convert.ToBase64String(imageBytes);
+                    return base64String;
+                }
+            }
+        }
+        
+
+        protected void Button7_Click(object sender, EventArgs e)
+        {
+            TextBox5.Text = ImageToBase64(); 
+        }
+
+    }
+}
